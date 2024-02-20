@@ -1,0 +1,51 @@
+name: "Criar repositório"
+description: "Criação de repositório na conta github."
+title: "Criação de repositório na conta github."
+labels: ["repositorio", "actions"]
+assignees:
+  - ${{github.author}}
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Formulário padrão para criação de repositório no Github
+
+  - type: input
+    id: prefix
+    attributes:
+      label: ">>Prefixo do repositório<<"
+      description: "Prefixo do repositório"
+      placeholder: app
+    validations:
+      required: true
+
+  - type: input
+    id: name
+    attributes:
+      label: ">>Nome do repositório<<"
+      description: "Nome do repositório"
+      placeholder: nome_repositorio
+    validations:
+      required: true
+
+  - type: dropdown
+    id: privacy
+    attributes:
+      label: ">>Privacidade<<"
+      description: "Privacidade"
+      options:
+        - private
+        - public
+    validations:
+      required: true
+
+  - type: dropdown
+    id: template
+    attributes:
+      label: ">>Template<<"
+      description: "Template"
+      options:
+        - java-maven
+        - python-lambda
+    validations:
+      required: true

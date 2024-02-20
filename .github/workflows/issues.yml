@@ -1,0 +1,57 @@
+name: Criação de repositório automatizado para as issues
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+
+env:
+  add-comment:
+    name: Add comment on Issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Acompanhe o setup através do link: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}
+          reactions: '+1'
+
+  form-to-json:
+    name: Convert Form Issue to JSON
+    runs-on: ubuntu-latest
+    needs: [add-comment]
+    outputs:
+      payload-parsed: ${{ steps.payload.outputs.json_var }}
+      workflow-type: ${{ steps.payload.outputs.workflow-type }}
+    steps:
+      - name: Get Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v2
+        with:
+          application_id: ${{ secrets.APPLICATION_ID }}
+          application_private_key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Run Issue form parser
+        id: parse
+        uses: peter-murray/issue-forms-body-parser@v3
+        with:
+          issue_id: ${{ github.event.issue.number }}
+          separator: '###'
+          label_marker_start: '>>'
+          label_marker_end: '<<'
+
+      - name: Set output script
+        id: payload
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ steps.get_workflow_token.outputs.token }}
+          script: |
+            const payload = ${{ steps.parse.outputs.payload }}
+            let template = payload.Template.split('\r\n')[0]
+            
+            core.setCommandEcho(true)
+            core.setOutput('workflow-type', template)
+            core.setOutput('json_var', payload)
+            core.setCommandEcho(false)
